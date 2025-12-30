@@ -41,10 +41,82 @@ function(){var a;return this._senders=this._senders||[],zb(a=this._senders).call
 c.RTCPeerConnection.prototype.addStream=function(c){var d;this._senders=this._senders||[];b.apply(this,[c]);r(d=c.getTracks()).call(d,b=>{this._senders.push(a(this,b))})};let d=c.RTCPeerConnection.prototype.removeStream;c.RTCPeerConnection.prototype.removeStream=function(a){var b;this._senders=this._senders||[];d.apply(this,[a]);r(b=a.getTracks()).call(b,a=>{var b;let c=U(b=this._senders).call(b,b=>b.track===a);var d,e;c&&Ja(d=this._senders).call(d,E(e=this._senders).call(e,c),1)})}}else if("object"==
 typeof c&&c.RTCPeerConnection&&"getSenders"in c.RTCPeerConnection.prototype&&"createDTMFSender"in c.RTCPeerConnection.prototype&&c.RTCRtpSender&&!("dtmf"in c.RTCRtpSender.prototype)){let a=c.RTCPeerConnection.prototype.getSenders;c.RTCPeerConnection.prototype.getSenders=function(){let b=a.apply(this,[]);return r(b).call(b,a=>a._pc=this),b};ba(c.RTCRtpSender.prototype,"dtmf",{get(){return void 0===this._dtmf&&("audio"===this.track.kind?this._dtmf=this._pc.createDTMFSender(this.track):this._dtmf=null),
 this._dtmf}})}}function Kg(c){if(c.RTCPeerConnection){var a=c.RTCPeerConnection.prototype.getStats;c.RTCPeerConnection.prototype.getStats=function(){let [b,c,e]=arguments;if(0<arguments.length&&"function"==typeof b)return a.apply(this,arguments);if(0===a.length&&(0===arguments.length||"function"!=typeof b))return a.apply(this,[]);let f=function(a){const b={};a=a.result();return r(a).call(a,a=>{var c;const d={id:a.id,timestamp:a.timestamp,type:{localcandidate:"local-candidate",remotecandidate:"remote-candidate"}[a.type]||
-a.type};r(c=a.names()).call(c,b=>{d[b]=a.stat(b)});b[d.id]=d}),b},g=function(a){var b;return new Y(A(b=S(a)).call(b,b=>[b,a[b]]))};return 2<=arguments.length?a.apply(this,[function(a){c(g(f(a)))},b]):(new u((b,c)=>{a.apply(this,[function(a){b(g(f(a)))},c])})).then(c,e)}}}function Lg(c){if("object"==typeof c&&c.RTCPeerConnection&&c.RTCRtpSender&&c.RTCRtpReceiver){if(!("getStats"in c.RTCRtpSender.prototype)){let a=c.RTCPeerConnection.prototype.getSenders;a&&(c.RTCPeerConnection.prototype.getSenders=
-function(){let b=a.apply(this,[]);return r(b).call(b,a=>a._pc=this),b});let d=c.RTCPeerConnection.prototype.addTrack;d&&(c.RTCPeerConnection.prototype.addTrack=function(){let a=d.apply(this,arguments);return a._pc=this,a});c.RTCRtpSender.prototype.getStats=function(){let a=this;return this._pc.getStats().then(b=>Cg(b,a.track,!0))}}if(!("getStats"in c.RTCRtpReceiver.prototype)){let a=c.RTCPeerConnection.prototype.getReceivers;a&&(c.RTCPeerConnection.prototype.getReceivers=function(){let b=a.apply(this,
-[]);return r(b).call(b,a=>a._pc=this),b});tc(c,"track",a=>(a.receiver._pc=a.srcElement,a));c.RTCRtpReceiver.prototype.getStats=function(){let a=this;return this._pc.getStats().then(b=>Cg(b,a.track,!1))}}if("getStats"in c.RTCRtpSender.prototype&&"getStats"in c.RTCRtpReceiver.prototype){var a=c.RTCPeerConnection.prototype.getStats;c.RTCPeerConnection.prototype.getStats=function(){if(0<arguments.length&&arguments[0]instanceof c.MediaStreamTrack){var b,d;let a=arguments[0],c,g,k;return r(b=this.getSenders()).call(b,
-b=>{b.track===a&&(c?k=!0:c=b)}),r(d=this.getReceivers()).call(d,b=>(b.track===a&&(g?k=!0:g=b),b.track===a)),k||c&&g?u.reject(new DOMException("There are more than one sender or receiver for the track.","InvalidAccessError")):c?c.getStats():g?g.getStats():u.reject(new DOMException("There is no sender or receiver for the track.","InvalidAccessError"))}return a.apply(this,arguments)}}}}function Mg(c){c.RTCPeerConnection.prototype.getLocalStreams=function(){var a;return this._shimmedLocalStreams=this._shimmedLocalStreams||
+a.type};r(c=a.names()).call(c,b=>{d[b]=a.stat(b)});b[d.id]=d}),b},g=function(a){var b;return new Y(A(b=S(a)).call(b,b=>[b,a[b]]))};return 2<=arguments.length?a.apply(this,[function(a){c(g(f(a)))},b]):(new u((b,c)=>{a.apply(this,[function(a){b(g(f(a)))},c])})).then(c,e)}}}function Lg(c){
+  if("object"==typeof c&&c.RTCPeerConnection&&c.RTCRtpSender&&c.RTCRtpReceiver){
+    if(!("getStats"in c.RTCRtpSender.prototype)){
+      let a=c.RTCPeerConnection.prototype.getSenders;
+      a&&(c.RTCPeerConnection.prototype.getSenders=function(){
+        let b=a.apply(this,[]);
+        return r(b).call(b,a=>a._pc=this),b
+      });
+      let d=c.RTCPeerConnection.prototype.addTrack;
+      d&&(c.RTCPeerConnection.prototype.addTrack=function(){
+        let a=d.apply(this,arguments);
+        return a._pc=this,a
+      });
+      c.RTCRtpSender.prototype.getStats=function(){
+        let a=this;
+        return this._pc.getStats().then(b=>Cg(b,a.track,!0))
+      }
+    }
+    if(!("getStats"in c.RTCRtpReceiver.prototype)){
+      let a=c.RTCPeerConnection.prototype.getReceivers;
+      a&&(c.RTCPeerConnection.prototype.getReceivers=function(){
+        let b=a.apply(this,[]);
+        return r(b).call(b,a=>a._pc=this),b
+      });
+      tc(c,"track",a=>(a.receiver._pc=a.srcElement,a));
+      c.RTCRtpReceiver.prototype.getStats=function(){
+        let a=this;
+        return this._pc.getStats().then(b=>Cg(b,a.track,!1))
+      }
+    }
+    if("getStats"in c.RTCRtpSender.prototype&&"getStats"in c.RTCRtpReceiver.prototype){
+      var a=c.RTCPeerConnection.prototype.getStats;
+      c.RTCPeerConnection.prototype.getStats=function(){
+
+        // --- PATCH: normalize "track-like" arg into a real MediaStreamTrack ---
+        if(arguments && arguments.length>0){
+          var t=arguments[0];
+          // Agora LocalTrack often has getMediaStreamTrack()
+          if(t && "function"==typeof t.getMediaStreamTrack){
+            try{ arguments[0]=t.getMediaStreamTrack(); }catch(e){}
+          }
+          // Sender/receiver-like wrapper { track: MediaStreamTrack }
+          else if(t && t.track && t.track instanceof c.MediaStreamTrack){
+            arguments[0]=t.track;
+          }
+          // Some wrappers stash it on _mediaStreamTrack
+          else if(t && t._mediaStreamTrack && t._mediaStreamTrack instanceof c.MediaStreamTrack){
+            arguments[0]=t._mediaStreamTrack;
+          }
+        }
+        if(0<arguments.length && arguments[0]instanceof c.MediaStreamTrack){
+          var b,d;
+          let a0=arguments[0],c0,g,k;
+          return r(b=this.getSenders()).call(b,
+            b=>{b.track===a0&&(c0?k=!0:c0=b)}
+          ),
+          r(d=this.getReceivers()).call(d,
+            b=>(b.track===a0&&(g?k=!0:g=b),b.track===a0)
+          ),
+          k||c0&&g
+            ? u.reject(new DOMException("There are more than one sender or receiver for the track.","InvalidAccessError"))
+            : c0 ? c0.getStats()
+            : g ? g.getStats()
+            : u.reject(new DOMException("There is no sender or receiver for the track.","InvalidAccessError"))
+        }
+
+        // --- PATCH: if still not a MediaStreamTrack, don't pass it through (Chrome will throw) ---
+        if(arguments && arguments.length>0 && !(arguments[0]instanceof c.MediaStreamTrack)){
+          return a.apply(this,[]);
+        }
+
+        return a.apply(this,arguments)
+      }
+    }
+  }
+}function Mg(c){c.RTCPeerConnection.prototype.getLocalStreams=function(){var a;return this._shimmedLocalStreams=this._shimmedLocalStreams||
 {},A(a=S(this._shimmedLocalStreams)).call(a,a=>this._shimmedLocalStreams[a][0])};let a=c.RTCPeerConnection.prototype.addTrack;c.RTCPeerConnection.prototype.addTrack=function(b,c){var d;if(!c)return a.apply(this,arguments);this._shimmedLocalStreams=this._shimmedLocalStreams||{};let e=a.apply(this,arguments);return this._shimmedLocalStreams[c.id]?-1===E(d=this._shimmedLocalStreams[c.id]).call(d,e)&&this._shimmedLocalStreams[c.id].push(e):this._shimmedLocalStreams[c.id]=[c,e],e};let b=c.RTCPeerConnection.prototype.addStream;
 c.RTCPeerConnection.prototype.addStream=function(a){var c,d,e;this._shimmedLocalStreams=this._shimmedLocalStreams||{};r(c=a.getTracks()).call(c,a=>{var b;if(U(b=this.getSenders()).call(b,b=>b.track===a))throw new DOMException("Track already exists.","InvalidAccessError");});let f=this.getSenders();b.apply(this,arguments);c=O(d=this.getSenders()).call(d,a=>-1===E(f).call(f,a));this._shimmedLocalStreams[a.id]=n(e=[a]).call(e,c)};let d=c.RTCPeerConnection.prototype.removeStream;c.RTCPeerConnection.prototype.removeStream=
 function(a){return this._shimmedLocalStreams=this._shimmedLocalStreams||{},delete this._shimmedLocalStreams[a.id],d.apply(this,arguments)};let e=c.RTCPeerConnection.prototype.removeTrack;c.RTCPeerConnection.prototype.removeTrack=function(a){var b;(this._shimmedLocalStreams=this._shimmedLocalStreams||{},a)&&r(b=S(this._shimmedLocalStreams)).call(b,b=>{var c;let d=E(c=this._shimmedLocalStreams[b]).call(c,a);var e;-1!==d&&Ja(e=this._shimmedLocalStreams[b]).call(e,d,1);1===this._shimmedLocalStreams[b].length&&
@@ -72,9 +144,34 @@ b.mediaDevices.getUserMedia(a).then(c,d)},!(55<a.version&&"autoGainControl"in b.
 c.prototype.getSettings;c.prototype.getSettings=function(){let c=b.apply(this,arguments);return a(c,"mozAutoGainControl","autoGainControl"),a(c,"mozNoiseSuppression","noiseSuppression"),c}}if(c&&c.prototype.applyConstraints){let b=c.prototype.applyConstraints;c.prototype.applyConstraints=function(c){return"audio"===this.kind&&"object"==typeof c&&(c=JSON.parse(z(c)),a(c,"autoGainControl","mozAutoGainControl"),a(c,"noiseSuppression","mozNoiseSuppression")),b.apply(this,[c])}}}}function Vg(c){"object"==
 typeof c&&c.RTCTrackEvent&&"receiver"in c.RTCTrackEvent.prototype&&!("transceiver"in c.RTCTrackEvent.prototype)&&ba(c.RTCTrackEvent.prototype,"transceiver",{get(){return{receiver:this.receiver}}})}function Ee(c){let a=Lb(c);if("object"==typeof c&&(c.RTCPeerConnection||c.mozRTCPeerConnection)){var b;(!c.RTCPeerConnection&&c.mozRTCPeerConnection&&(c.RTCPeerConnection=c.mozRTCPeerConnection),53>a.version)&&r(b=["setLocalDescription","setRemoteDescription","addIceCandidate"]).call(b,function(a){let b=
 c.RTCPeerConnection.prototype[a];c.RTCPeerConnection.prototype[a]={[a](){return arguments[0]=new ("addIceCandidate"===a?c.RTCIceCandidate:c.RTCSessionDescription)(arguments[0]),b.apply(this,arguments)}}[a]});var d=c.RTCPeerConnection.prototype.addIceCandidate;c.RTCPeerConnection.prototype.addIceCandidate=function(){return arguments[0]?68>a.version&&arguments[0]&&""===arguments[0].candidate?u.resolve():d.apply(this,arguments):(arguments[1]&&arguments[1].apply(null),u.resolve())};var e={inboundrtp:"inbound-rtp",
-outboundrtp:"outbound-rtp",candidatepair:"candidate-pair",localcandidate:"local-candidate",remotecandidate:"remote-candidate"},f=c.RTCPeerConnection.prototype.getStats;c.RTCPeerConnection.prototype.getStats=function(){let [b,c,d]=arguments;return f.apply(this,[b||null]).then(b=>{if(53>a.version&&!c)try{r(b).call(b,a=>{a.type=e[a.type]||a.type})}catch(L){if("TypeError"!==L.name)throw L;r(b).call(b,(a,c)=>{b.set(c,ab({},a,{type:e[a.type]||a.type}))})}return b}).then(c,d)}}}function Wg(c){if("object"==
-typeof c&&c.RTCPeerConnection&&c.RTCRtpSender&&!(c.RTCRtpSender&&"getStats"in c.RTCRtpSender.prototype)){var a=c.RTCPeerConnection.prototype.getSenders;a&&(c.RTCPeerConnection.prototype.getSenders=function(){let b=a.apply(this,[]);return r(b).call(b,a=>a._pc=this),b});var b=c.RTCPeerConnection.prototype.addTrack;b&&(c.RTCPeerConnection.prototype.addTrack=function(){let a=b.apply(this,arguments);return a._pc=this,a});c.RTCRtpSender.prototype.getStats=function(){return this.track?this._pc.getStats(this.track):
-u.resolve(new Y)}}}function Xg(c){if("object"==typeof c&&c.RTCPeerConnection&&c.RTCRtpSender&&!(c.RTCRtpSender&&"getStats"in c.RTCRtpReceiver.prototype)){var a=c.RTCPeerConnection.prototype.getReceivers;a&&(c.RTCPeerConnection.prototype.getReceivers=function(){let b=a.apply(this,[]);return r(b).call(b,a=>a._pc=this),b});tc(c,"track",a=>(a.receiver._pc=a.srcElement,a));c.RTCRtpReceiver.prototype.getStats=function(){return this._pc.getStats(this.track)}}}function Yg(c){!c.RTCPeerConnection||"removeStream"in
+outboundrtp:"outbound-rtp",candidatepair:"candidate-pair",localcandidate:"local-candidate",remotecandidate:"remote-candidate"},f=c.RTCPeerConnection.prototype.getStats;c.RTCPeerConnection.prototype.getStats=function(){let [b,c,d]=arguments;return f.apply(this,[b||null]).then(b=>{if(53>a.version&&!c)try{r(b).call(b,a=>{a.type=e[a.type]||a.type})}catch(L){if("TypeError"!==L.name)throw L;r(b).call(b,(a,c)=>{b.set(c,ab({},a,{type:e[a.type]||a.type}))})}return b}).then(c,d)}}}function Wg(c){
+  if("object"==typeof c&&c.RTCPeerConnection&&c.RTCRtpSender&&!(c.RTCRtpSender&&"getStats"in c.RTCRtpSender.prototype)){
+    var a=c.RTCPeerConnection.prototype.getSenders;
+    a&&(c.RTCPeerConnection.prototype.getSenders=function(){let b=a.apply(this,[]);return r(b).call(b,a=>a._pc=this),b});
+    var b=c.RTCPeerConnection.prototype.addTrack;
+    b&&(c.RTCPeerConnection.prototype.addTrack=function(){let a=b.apply(this,arguments);return a._pc=this,a});
+    c.RTCRtpSender.prototype.getStats=function(){
+      try{
+        return this.track && this.track instanceof c.MediaStreamTrack ? this._pc.getStats(this.track) : this._pc.getStats();
+      }catch(a){
+        return this._pc.getStats();
+      }
+    }
+  }
+}function Xg(c){
+  if("object"==typeof c&&c.RTCPeerConnection&&c.RTCRtpSender&&!(c.RTCRtpSender&&"getStats"in c.RTCRtpReceiver.prototype)){
+    var a=c.RTCPeerConnection.prototype.getReceivers;
+    a&&(c.RTCPeerConnection.prototype.getReceivers=function(){let b=a.apply(this,[]);return r(b).call(b,a=>a._pc=this),b});
+    tc(c,"track",a=>(a.receiver._pc=a.srcElement,a));
+    c.RTCRtpReceiver.prototype.getStats=function(){
+      try{
+        return this.track && this.track instanceof c.MediaStreamTrack ? this._pc.getStats(this.track) : this._pc.getStats();
+      }catch(a){
+        return this._pc.getStats();
+      }
+    }
+  }
+}function Yg(c){!c.RTCPeerConnection||"removeStream"in
 c.RTCPeerConnection.prototype||(c.RTCPeerConnection.prototype.removeStream=function(a){var b;Bd("removeStream","removeTrack");r(b=this.getSenders()).call(b,b=>{var c;b.track&&Ba(c=a.getTracks()).call(c,b.track)&&this.removeTrack(b)})})}function Zg(c){c.DataChannel&&!c.RTCDataChannel&&(c.RTCDataChannel=c.DataChannel)}function $g(c){if("object"==typeof c&&c.RTCPeerConnection){if("getLocalStreams"in c.RTCPeerConnection.prototype||(c.RTCPeerConnection.prototype.getLocalStreams=function(){return this._localStreams||
 (this._localStreams=[]),this._localStreams}),!("addStream"in c.RTCPeerConnection.prototype)){let a=c.RTCPeerConnection.prototype.addTrack;c.RTCPeerConnection.prototype.addStream=function(b){var c,e,f;this._localStreams||(this._localStreams=[]);Ba(c=this._localStreams).call(c,b)||this._localStreams.push(b);r(e=b.getAudioTracks()).call(e,c=>a.call(this,c,b));r(f=b.getVideoTracks()).call(f,c=>a.call(this,c,b))};c.RTCPeerConnection.prototype.addTrack=function(b,c){var d;c&&(this._localStreams?Ba(d=this._localStreams).call(d,
 c)||this._localStreams.push(c):this._localStreams=[c]);return a.call(this,b,c)}}"removeStream"in c.RTCPeerConnection.prototype||(c.RTCPeerConnection.prototype.removeStream=function(a){var b,c,e;this._localStreams||(this._localStreams=[]);let f=E(b=this._localStreams).call(b,a);if(-1!==f){Ja(c=this._localStreams).call(c,f,1);var g=a.getTracks();r(e=this.getSenders()).call(e,a=>{Ba(g).call(g,a.track)&&this.removeTrack(a)})}})}}function ah(c){if("object"==typeof c&&c.RTCPeerConnection&&("getRemoteStreams"in
@@ -572,16 +669,191 @@ b);-1!==b&&Ja(d).call(d,b,1);0===this._events[a].length&&delete this._events[a]}
 b,d){this.record("AUDIO_INPUT_LEVEL_TOO_LOW",a,this.checkAudioInputLevel(d));this.record("SEND_AUDIO_BITRATE_TOO_LOW",a,this.checkSendAudioBitrate(d))}setLocalVideoStats(a,b,d){this.record("SEND_VIDEO_BITRATE_TOO_LOW",a,this.checkSendVideoBitrate(d));this.record("FRAMERATE_INPUT_TOO_LOW",a,this.checkFramerateInput(d,b));this.record("FRAMERATE_SENT_TOO_LOW",a,this.checkFramerateSent(d))}setRemoteAudioStats(a,b){a=a.getUserId();this.record("AUDIO_OUTPUT_LEVEL_TOO_LOW",a,this.checkAudioOutputLevel(b))}setRemoteVideoStats(a,
 b){a=a.getUserId();this.record("RECV_VIDEO_DECODE_FAILED",a,this.checkVideoDecode(b))}record(a,b,d){this.resultStorage.has(a)||this.resultStorage.set(a,{result:[],isPrevNormal:!0});let e=this.resultStorage.get(a);if(e&&(e.result.push(d),5<=e.result.length)){var f;d=Ba(f=e.result).call(f,!0);e.isPrevNormal&&!d&&this.emit("exception",Pk[a],a,b);!e.isPrevNormal&&d&&this.emit("exception",Pk[a]+2E3,a+"_RECOVER",b);e.isPrevNormal=d;e.result=[]}}checkAudioOutputLevel(a){return!(0<a.receiveBitrate&&0===a.receiveLevel)}checkAudioInputLevel(a){return 0!==
 a.sendVolumeLevel}checkFramerateInput(a,b){let d=null;b._encoderConfig&&b._encoderConfig.frameRate&&(d=Cb(b._encoderConfig.frameRate));a=a.captureFrameRate;return!d||!a||!(10<d&&5>a||10>d&&5<=d&&1>=a)}checkFramerateSent(a){return!(a.captureFrameRate&&a.sendFrameRate&&5<a.captureFrameRate&&1>=a.sendFrameRate)}checkSendVideoBitrate(a){return 0!==a.sendBitrate}checkSendAudioBitrate(a){return 0!==a.sendBitrate}checkVideoDecode(a){return 0===a.receiveBitrate||0!==a.decodeFrameRate}}let Pk={FRAMERATE_INPUT_TOO_LOW:1001,
-FRAMERATE_SENT_TOO_LOW:1002,SEND_VIDEO_BITRATE_TOO_LOW:1003,RECV_VIDEO_DECODE_FAILED:1005,AUDIO_INPUT_LEVEL_TOO_LOW:2001,AUDIO_OUTPUT_LEVEL_TOO_LOW:2002,SEND_AUDIO_BITRATE_TOO_LOW:2003};class Zc{constructor(a){this.localConnectionsMap=new Y;this.remoteConnectionsMap=new Y;this.trafficStatsPeerList=[];this.updateStats=()=>{var a,d;r(a=this.remoteConnectionsMap).call(a,a=>{var b;let d=a.audioStats;var e=a.videoStats,q=a.pcStats;let h=Bb({},fg),l=Bb({},gg),n=Bb({},yk),m=a.connection.pc.getStats(),p=
-m.audioRecv[0],r=m.videoRecv[0];q=q?q.videoRecv[0]:void 0;let t=!0===a.connection.pc._statsFilter.videoIsReady,u=this.trafficStats&&U(b=this.trafficStats.peer_delay).call(b,b=>b.peer_uid===a.connection.getUserId());p&&("opus"!==p.codec&&"aac"!==p.codec||(h.codecType=p.codec),p.outputLevel?h.receiveLevel=Math.round(32767*p.outputLevel):a.connection.user.audioTrack&&(h.receiveLevel=Math.round(32767*a.connection.user.audioTrack.getVolumeLevel())),h.receiveBytes=p.bytes,h.receivePackets=p.packets,h.receivePacketsLost=
-p.packetsLost,h.packetLossRate=h.receivePacketsLost/h.receivePackets,h.receiveBitrate=d?8*Math.max(0,h.receiveBytes-d.receiveBytes):0,h.totalDuration=d?d.totalDuration+1:1,h.totalFreezeTime=d?d.totalFreezeTime:0,h.freezeRate=h.totalFreezeTime/h.totalDuration,h.receiveDelay=p.jitterBufferMs,b=a.connection.user.audioTrack,10<h.totalDuration&&Zc.isRemoteAudioFreeze(b)&&(h.totalFreezeTime+=1));r&&("H264"!==r.codec&&"VP8"!==r.codec||(l.codecType=r.codec),l.receiveBytes=r.bytes,l.receiveBitrate=e?8*Math.max(0,
-l.receiveBytes-e.receiveBytes):0,l.decodeFrameRate=r.decodeFrameRate,l.renderFrameRate=r.decodeFrameRate,r.outputFrame&&(l.renderFrameRate=r.outputFrame.frameRate),r.receivedFrame?(l.receiveFrameRate=r.receivedFrame.frameRate,l.receiveResolutionHeight=r.receivedFrame.height,l.receiveResolutionWidth=r.receivedFrame.width):a.connection.user.videoTrack&&(l.receiveResolutionHeight=a.connection.user.videoTrack._videoHeight||0,l.receiveResolutionHeight=a.connection.user.videoTrack._videoWidth||0),void 0!==
-r.framesRateFirefox&&(l.receiveFrameRate=Math.round(r.framesRateFirefox)),l.receivePackets=r.packets,l.receivePacketsLost=r.packetsLost,l.packetLossRate=l.receivePacketsLost/l.receivePackets,l.totalDuration=e?e.totalDuration+1:1,l.totalFreezeTime=e?e.totalFreezeTime:0,l.receiveDelay=r.jitterBufferMs||0,e=a.connection.user.videoTrack,a.connection.subscribeOptions.video&&t&&Zc.isRemoteVideoFreeze(e,r,q)&&(l.totalFreezeTime+=1),l.freezeRate=l.totalFreezeTime/l.totalDuration);u&&(h.end2EndDelay=u.B_ad,
-l.end2EndDelay=u.B_vd,h.transportDelay=u.B_ed,l.transportDelay=u.B_ed,n.uplinkNetworkQuality=u.B_punq?u.B_punq:0,n.downlinkNetworkQuality=u.B_pdnq?u.B_punq:0);a.audioStats=h;a.videoStats=l;a.pcStats=m;a.networkStats=n;a.connection.user.audioTrack&&this.exceptionMonitor.setRemoteAudioStats(a.connection.user.audioTrack,h);a.connection.user.videoTrack&&this.exceptionMonitor.setRemoteVideoStats(a.connection.user.videoTrack,l)});r(d=this.localConnectionsMap).call(d,a=>{let b=a.audioStats,d=a.videoStats,
-e=Bb({},te),h=Bb({},ue);var l=a.connection.pc.getStats();let n=l.audioSend[0];l=l.videoSend[0];let m=a.connection.getUserId();n&&("opus"!==n.codec&&"aac"!==n.codec||(e.codecType=n.codec),n.inputLevel?e.sendVolumeLevel=Math.round(32767*n.inputLevel):a.connection.audioTrack&&(e.sendVolumeLevel=Math.round(32767*a.connection.audioTrack.getVolumeLevel())),e.sendBytes=n.bytes,e.sendPackets=n.packets,e.sendPacketsLost=n.packetsLost,e.sendBitrate=b?8*Math.max(0,e.sendBytes-b.sendBytes):0);l&&("H264"!==l.codec&&
-"VP8"!==l.codec||(h.codecType=l.codec),h.sendBytes=l.bytes,h.sendBitrate=d?8*Math.max(0,h.sendBytes-d.sendBytes):0,l.inputFrame?(h.captureFrameRate=l.inputFrame.frameRate,h.captureResolutionHeight=l.inputFrame.height,h.captureResolutionWidth=l.inputFrame.width):a.connection.videoTrack&&(h.captureResolutionWidth=a.connection.videoTrack._videoWidth||0,h.captureResolutionHeight=a.connection.videoTrack._videoHeight||0),l.sentFrame?(h.sendFrameRate=l.sentFrame.frameRate,h.sendResolutionHeight=l.sentFrame.height,
-h.sendResolutionWidth=l.sentFrame.width):a.connection.videoTrack&&(h.sendResolutionWidth=a.connection.videoTrack._videoWidth||0,h.sendResolutionHeight=a.connection.videoTrack._videoHeight||0),l.avgEncodeMs&&(h.encodeDelay=l.avgEncodeMs),a.connection.videoTrack&&a.connection.videoTrack._encoderConfig&&a.connection.videoTrack._encoderConfig.bitrateMax&&(h.targetSendBitrate=1E3*a.connection.videoTrack._encoderConfig.bitrateMax),h.sendPackets=l.packets,h.sendPacketsLost=l.packetsLost,h.totalDuration=
-d?d.totalDuration+1:1,h.totalFreezeTime=d?d.totalFreezeTime:0,this.isLocalVideoFreeze(l)&&(h.totalFreezeTime+=1));a.audioStats=e;a.videoStats=h;a.audioStats&&a.connection.audioTrack&&this.exceptionMonitor.setLocalAudioStats(m,a.connection.audioTrack,a.audioStats);a.videoStats&&a.connection.videoTrack&&this.exceptionMonitor.setLocalVideoStats(m,a.connection.videoTrack,a.videoStats)})};this.clientId=a;this.updateStatsInterval=window.setInterval(this.updateStats,1E3);this.exceptionMonitor=new wp;this.exceptionMonitor.on("exception",
+FRAMERATE_SENT_TOO_LOW:1002,SEND_VIDEO_BITRATE_TOO_LOW:1003,RECV_VIDEO_DECODE_FAILED:1005,AUDIO_INPUT_LEVEL_TOO_LOW:2001,AUDIO_OUTPUT_LEVEL_TOO_LOW:2002,SEND_AUDIO_BITRATE_TOO_LOW:2003};class Zc{
+  constructor(a){
+    this.localConnectionsMap=new Y;
+    this.remoteConnectionsMap=new Y;
+    this.trafficStatsPeerList=[];
+
+    // Helper: safely get stats object from Agora connection.pc.getStats()
+    // Returns a "shape-compatible" object even if underlying getStats throws / is missing fields.
+    this._safePcGetStats=(pc)=>{
+      let s=null;
+      try{
+        s=pc&&pc.getStats?pc.getStats():null;
+      }catch(e){
+        s=null;
+      }
+      // normalize to expected structure so downstream code never crashes
+      if(!s||"object"!=typeof s) s={};
+      if(!s.audioRecv) s.audioRecv=[];
+      if(!s.videoRecv) s.videoRecv=[];
+      if(!s.audioSend) s.audioSend=[];
+      if(!s.videoSend) s.videoSend=[];
+      return s;
+    };
+
+    this.updateStats=()=>{
+      var a,d;
+
+      // ------- REMOTE -------
+      r(a=this.remoteConnectionsMap).call(a,a=>{
+        var b;
+
+        let d=a.audioStats;
+        var e=a.videoStats, q=a.pcStats;
+
+        let h=Bb({},fg),
+            l=Bb({},gg),
+            n=Bb({},yk);
+
+        // SAFE: never let getStats crash this loop
+        let m=this._safePcGetStats(a.connection.pc);
+
+        // SAFE: defensive indexing
+        let p=m.audioRecv && m.audioRecv.length ? m.audioRecv[0] : void 0;
+        let r0=m.videoRecv && m.videoRecv.length ? m.videoRecv[0] : void 0;
+
+        q=q&&q.videoRecv&&q.videoRecv.length?q.videoRecv[0]:void 0;
+
+        let t=!0===a.connection.pc._statsFilter && !0===a.connection.pc._statsFilter.videoIsReady;
+        u=this.trafficStats&&U(b=this.trafficStats.peer_delay).call(b,b=>b.peer_uid===a.connection.getUserId());
+
+        // ---- remote audio ----
+        p&&(
+          ("opus"!==p.codec&&"aac"!==p.codec||(h.codecType=p.codec)),
+          p.outputLevel?h.receiveLevel=Math.round(32767*p.outputLevel):
+            a.connection.user.audioTrack&&(h.receiveLevel=Math.round(32767*a.connection.user.audioTrack.getVolumeLevel())),
+          h.receiveBytes=p.bytes||0,
+          h.receivePackets=p.packets||0,
+          h.receivePacketsLost=p.packetsLost||0,
+          h.packetLossRate=h.receivePackets? (h.receivePacketsLost/h.receivePackets) : 0,
+          h.receiveBitrate=d?8*Math.max(0,h.receiveBytes-(d.receiveBytes||0)):0,
+          h.totalDuration=d?(d.totalDuration||0)+1:1,
+          h.totalFreezeTime=d?(d.totalFreezeTime||0):0,
+          h.freezeRate=h.totalDuration? (h.totalFreezeTime/h.totalDuration) : 0,
+          h.receiveDelay=p.jitterBufferMs||0,
+          b=a.connection.user.audioTrack,
+          10<h.totalDuration&&Zc.isRemoteAudioFreeze(b)&&(h.totalFreezeTime+=1)
+        );
+
+        // ---- remote video ----
+        r0&&(
+          ("H264"!==r0.codec&&"VP8"!==r0.codec||(l.codecType=r0.codec)),
+          l.receiveBytes=r0.bytes||0,
+          l.receiveBitrate=e?8*Math.max(0,l.receiveBytes-(e.receiveBytes||0)):0,
+          l.decodeFrameRate=r0.decodeFrameRate||0,
+          l.renderFrameRate=r0.decodeFrameRate||0,
+          r0.outputFrame&&(l.renderFrameRate=r0.outputFrame.frameRate||l.renderFrameRate),
+          r0.receivedFrame?
+            (l.receiveFrameRate=r0.receivedFrame.frameRate||0,
+             l.receiveResolutionHeight=r0.receivedFrame.height||0,
+             l.receiveResolutionWidth=r0.receivedFrame.width||0)
+            :
+            a.connection.user.videoTrack&&
+              (l.receiveResolutionHeight=a.connection.user.videoTrack._videoHeight||0,
+               l.receiveResolutionWidth=a.connection.user.videoTrack._videoWidth||0),
+          void 0!==r0.framesRateFirefox&&(l.receiveFrameRate=Math.round(r0.framesRateFirefox)),
+          l.receivePackets=r0.packets||0,
+          l.receivePacketsLost=r0.packetsLost||0,
+          l.packetLossRate=l.receivePackets? (l.receivePacketsLost/l.receivePackets) : 0,
+          l.totalDuration=e?(e.totalDuration||0)+1:1,
+          l.totalFreezeTime=e?(e.totalFreezeTime||0):0,
+          l.receiveDelay=r0.jitterBufferMs||0,
+          e=a.connection.user.videoTrack,
+          a.connection.subscribeOptions.video&&t&&Zc.isRemoteVideoFreeze(e,r0,q)&&(l.totalFreezeTime+=1),
+          l.freezeRate=l.totalDuration? (l.totalFreezeTime/l.totalDuration) : 0
+        );
+
+        // ---- remote network delay ----
+        u&&(
+          h.end2EndDelay=u.B_ad,
+          l.end2EndDelay=u.B_vd,
+          h.transportDelay=u.B_ed,
+          l.transportDelay=u.B_ed,
+          n.uplinkNetworkQuality=u.B_punq?u.B_punq:0,
+          n.downlinkNetworkQuality=u.B_pdnq?u.B_pdnq:0
+        );
+
+        a.audioStats=h;
+        a.videoStats=l;
+        a.pcStats=m;
+        a.networkStats=n;
+
+        a.connection.user.audioTrack && this.exceptionMonitor.setRemoteAudioStats(a.connection.user.audioTrack,h);
+        a.connection.user.videoTrack && this.exceptionMonitor.setRemoteVideoStats(a.connection.user.videoTrack,l);
+      });
+
+      // ------- LOCAL -------
+      r(d=this.localConnectionsMap).call(d,a=>{
+        let b=a.audioStats,
+            d=a.videoStats,
+            e=Bb({},te),
+            h=Bb({},ue);
+
+        // SAFE: never let getStats crash this loop
+        var l=this._safePcGetStats(a.connection.pc);
+
+        let n=l.audioSend && l.audioSend.length ? l.audioSend[0] : void 0;
+        let l0=l.videoSend && l.videoSend.length ? l.videoSend[0] : void 0;
+
+        let m=a.connection.getUserId();
+
+        // ---- local audio ----
+        n&&(
+          ("opus"!==n.codec&&"aac"!==n.codec||(e.codecType=n.codec)),
+          n.inputLevel?e.sendVolumeLevel=Math.round(32767*n.inputLevel):
+            a.connection.audioTrack&&(e.sendVolumeLevel=Math.round(32767*a.connection.audioTrack.getVolumeLevel())),
+          e.sendBytes=n.bytes||0,
+          e.sendPackets=n.packets||0,
+          e.sendPacketsLost=n.packetsLost||0,
+          e.sendBitrate=b?8*Math.max(0,e.sendBytes-(b.sendBytes||0)):0
+        );
+
+        // ---- local video ----
+        l0&&(
+          ("H264"!==l0.codec&&"VP8"!==l0.codec||(h.codecType=l0.codec)),
+          h.sendBytes=l0.bytes||0,
+          h.sendBitrate=d?8*Math.max(0,h.sendBytes-(d.sendBytes||0)):0,
+
+          l0.inputFrame?
+            (h.captureFrameRate=l0.inputFrame.frameRate||0,
+             h.captureResolutionHeight=l0.inputFrame.height||0,
+             h.captureResolutionWidth=l0.inputFrame.width||0)
+            :
+            a.connection.videoTrack&&
+              (h.captureResolutionWidth=a.connection.videoTrack._videoWidth||0,
+               h.captureResolutionHeight=a.connection.videoTrack._videoHeight||0),
+
+          l0.sentFrame?
+            (h.sendFrameRate=l0.sentFrame.frameRate||0,
+             h.sendResolutionHeight=l0.sentFrame.height||0,
+             h.sendResolutionWidth=l0.sentFrame.width||0)
+            :
+            a.connection.videoTrack&&
+              (h.sendResolutionWidth=a.connection.videoTrack._videoWidth||0,
+               h.sendResolutionHeight=a.connection.videoTrack._videoHeight||0),
+
+          l0.avgEncodeMs&&(h.encodeDelay=l0.avgEncodeMs),
+          a.connection.videoTrack&&a.connection.videoTrack._encoderConfig&&a.connection.videoTrack._encoderConfig.bitrateMax&&
+            (h.targetSendBitrate=1E3*a.connection.videoTrack._encoderConfig.bitrateMax),
+
+          h.sendPackets=l0.packets||0,
+          h.sendPacketsLost=l0.packetsLost||0,
+          h.totalDuration=d?(d.totalDuration||0)+1:1,
+          h.totalFreezeTime=d?(d.totalFreezeTime||0):0,
+          this.isLocalVideoFreeze(l0)&&(h.totalFreezeTime+=1)
+        );
+
+        a.audioStats=e;
+        a.videoStats=h;
+
+        a.audioStats&&a.connection.audioTrack&&this.exceptionMonitor.setLocalAudioStats(m,a.connection.audioTrack,a.audioStats);
+        a.videoStats&&a.connection.videoTrack&&this.exceptionMonitor.setLocalVideoStats(m,a.connection.videoTrack,a.videoStats);
+      });
+    };
+  }
+};this.clientId=a;this.updateStatsInterval=window.setInterval(this.updateStats,1E3);this.exceptionMonitor=new wp;this.exceptionMonitor.on("exception",
 (a,d,e)=>{this.onStatsException&&this.onStatsException(a,d,e)})}reset(){this.localConnectionsMap=new Y;this.remoteConnectionsMap=new Y;this.trafficStats=void 0;this.trafficStatsPeerList=[];this.uplinkStats=void 0}getLocalAudioTrackStats(a){return(a=this.localConnectionsMap.get(a))&&a.audioStats?a.audioStats:Bb({},te)}getLocalVideoTrackStats(a){return(a=this.localConnectionsMap.get(a))&&a.videoStats?a.videoStats:Bb({},ue)}getRemoteAudioTrackStats(a){var b;let d=this.remoteConnectionsMap.get(a);if(!d||
 !d.audioStats)return Bb({},fg);if(!this.trafficStats)return d.audioStats;a=U(b=this.trafficStats.peer_delay).call(b,a=>a.peer_uid===d.connection.user.uid);return a&&(d.audioStats.publishDuration=a.B_ppad+(v()-this.trafficStats.timestamp)),d.audioStats}getRemoteNetworkQualityStats(a){return(a=this.remoteConnectionsMap.get(a))&&a.networkStats?a.networkStats:Bb({},yk)}getRemoteVideoTrackStats(a){var b;let d=this.remoteConnectionsMap.get(a);if(!d||!d.videoStats)return Bb({},gg);if(!this.trafficStats)return d.videoStats;
 a=U(b=this.trafficStats.peer_delay).call(b,a=>a.peer_uid===d.connection.user.uid);return a&&(d.videoStats.publishDuration=a.B_ppvd+(v()-this.trafficStats.timestamp)),d.videoStats}getRTCStats(){var a,b;let d=0,e=0,f=0,g=0;r(a=this.localConnectionsMap).call(a,a=>{a.audioStats&&(d+=a.audioStats.sendBytes,e+=a.audioStats.sendBitrate);a.videoStats&&(d+=a.videoStats.sendBytes,e+=a.videoStats.sendBitrate)});r(b=this.remoteConnectionsMap).call(b,a=>{a.audioStats&&(f+=a.audioStats.receiveBytes,g+=a.audioStats.receiveBitrate);
@@ -739,8 +1011,20 @@ b.onFirstVideoDecoded(d.decodedFrame.width,d.decodedFrame.height),b.isFirstVideo
 0)}b.lastDecodeVideoReceiverStats.set(d.ssrc,{stats:wg({},d),lts:Date.now()});b._stats.videoRecv.push(d);break;case "audio_recv":d=hb(al);d.codec=a.googCodecName;d.outputLevel=Math.abs(Number(a.audioOutputLevel))/32767;d.decodingCNG=Number(a.googDecodingCNG);d.decodingCTN=Number(a.googDecodingCTN);d.decodingCTSG=Number(a.googDecodingCTSG);d.decodingNormal=Number(a.googDecodingNormal);d.decodingPLC=Number(a.googDecodingPLC);d.decodingPLCCNG=Number(a.googDecodingPLCCNG);d.expandRate=Number(a.googExpandRate);
 d.accelerateRate=Number(a.googAccelerateRate);d.preemptiveExpandRate=Number(a.googPreemptiveExpandRate);d.secondaryDecodedRate=Number(a.googSecondaryDecodedRate);d.speechExpandRate=Number(a.googSpeechExpandRate);d.preferredJitterBufferMs=Number(a.googPreferredJitterBufferMs);d.jitterBufferMs=Number(a.googJitterBufferMs);d.jitterMs=Number(a.googJitterReceived);d.bytes=Number(a.bytesReceived);d.packets=Number(a.packetsReceived);d.packetsLost=Number(a.packetsLost);d.ssrc=Number(a.ssrc);d.receivedFrames=
 Number(a.googDecodingCTN)||Number(a.packetsReceived);d.droppedFrames=Number(a.googDecodingPLC)+Number(a.googDecodingPLCCNG)||Number(a.packetsLost);0<d.receivedFrames&&!b.isFirstAudioReceived&&(b.onFirstAudioReceived&&b.onFirstAudioReceived(),b.isFirstAudioReceived=!0);0<d.decodingNormal&&!b.isFirstAudioDecoded&&(b.onFirstAudioDecoded&&b.onFirstAudioDecoded(),b.isFirstAudioDecoded=!0);b._stats.audioRecv.push(d);break;case "audio_send":d=hb($k),d.codec=a.googCodecName,d.inputLevel=Math.abs(Number(a.audioInputLevel))/
-32767,d.aecReturnLoss=Number(a.googEchoCancellationReturnLoss||0),d.aecReturnLossEnhancement=Number(a.googEchoCancellationReturnLossEnhancement||0),d.residualEchoLikelihood=Number(a.googResidualEchoLikelihood||0),d.residualEchoLikelihoodRecentMax=Number(a.googResidualEchoLikelihoodRecentMax||0),d.bytes=Number(a.bytesSent),d.packets=Number(a.packetsSent),d.packetsLost=Number(a.packetsLost),d.ssrc=Number(a.ssrc),d.rttMs=Number(a.googRtt||0),b._stats.rtt=d.rttMs,b._stats.audioSend.push(d)}})},b.prototype._getStats=
-function(){var a=this;return new Promise(function(b,d){a.pc.getStats(b,d)})},b.prototype.statsResponsesToObjects=function(a){var b=[];return a.result().forEach(function(a){var d={id:a.id,timestamp:a.timestamp.valueOf().toString(),type:a.type};a.names().forEach(function(b){d[b]=a.stat(b)});b.push(d)}),b},b}(xg),dc;!function(a){a.CERTIFICATE="certificate";a.CODEC="codec";a.CANDIDATE_PAIR="candidate-pair";a.LOCAL_CANDIDATE="local-candidate";a.REMOTE_CANDIDATE="remote-candidate";a.INBOUND="inbound-rtp";
+32767,d.aecReturnLoss=Number(a.googEchoCancellationReturnLoss||0),d.aecReturnLossEnhancement=Number(a.googEchoCancellationReturnLossEnhancement||0),d.residualEchoLikelihood=Number(a.googResidualEchoLikelihood||0),d.residualEchoLikelihoodRecentMax=Number(a.googResidualEchoLikelihoodRecentMax||0),d.bytes=Number(a.bytesSent),d.packets=Number(a.packetsSent),d.packetsLost=Number(a.packetsLost),d.ssrc=Number(a.ssrc),d.rttMs=Number(a.googRtt||0),b._stats.rtt=d.rttMs,b._stats.audioSend.push(d)}})},b.prototype._getStats=function(){
+  // Modern browsers: Promise-based getStats()
+  return this.pc.getStats();
+},
+b.prototype.statsResponsesToObjects=function(a){
+  var b=[];
+  // Modern RTCStatsReport: Map-like with forEach((stat)=>{})
+  a.forEach(function(a){
+    var d={id:a.id,timestamp:(a.timestamp?Math.round(a.timestamp):Date.now()).toString(),type:a.type};
+    for (var e in a) try{ d[e]=a[e]; }catch(f){}
+    b.push(d);
+  });
+  return b;
+},b}(xg),dc;!function(a){a.CERTIFICATE="certificate";a.CODEC="codec";a.CANDIDATE_PAIR="candidate-pair";a.LOCAL_CANDIDATE="local-candidate";a.REMOTE_CANDIDATE="remote-candidate";a.INBOUND="inbound-rtp";
 a.TRACK="track";a.OUTBOUND="outbound-rtp";a.PC="peer-connection";a.REMOTE_INBOUND="remote-inbound-rtp";a.REMOTE_OUTBOUND="remote-outbound-rtp";a.TRANSPORT="transport";a.CSRC="csrc";a.DATA_CHANNEL="data-channel";a.STREAM="stream";a.SENDER="sender";a.RECEIVER="receiver"}(dc||(dc={}));var bl=function(a){function b(){var b=null!==a&&a.apply(this,arguments)||this;return b._stats=yd,b.lastDecodeVideoReceiverStats=new Map,b.lastVideoFramesRecv=new Map,b.lastVideoFramesSent=new Map,b.lastVideoFramesDecode=
 new Map,b.mediaBytesSent=new Map,b.mediaBytesRetransmit=new Map,b.mediaBytesTargetEncode=new Map,b.lastEncoderMs=new Map,b}return ff(b,a),b.prototype.updateStats=function(){return gf(this,void 0,void 0,function(){var a,b=this;return hf(this,function(d){switch(d.label){case 0:return a=this,[4,this.pc.getStats()];case 1:return a.report=d.sent(),this._stats=hb(yd),this.report.forEach(function(a){switch(a.type){case dc.OUTBOUND:"audio"===a.mediaType?b.processAudioOutboundStats(a):"video"===a.mediaType&&
 b.processVideoOutboundStats(a);break;case dc.INBOUND:"audio"===a.mediaType?b.processAudioInboundStats(a):"video"===a.mediaType&&b.processVideoInboundStats(a);break;case dc.TRANSPORT:(a=b.report.get(a.selectedCandidatePairId))&&b.processCandidatePairStats(a);break;case dc.CANDIDATE_PAIR:a.selected&&b.processCandidatePairStats(a)}}),this.updateSendBitrate(),this._stats.timestamp=Date.now(),this.calcLossRate(this._stats),this.stats=this._stats,[2]}})})},b.prototype.processCandidatePairStats=function(a){this._stats.sendBandwidth=
@@ -761,7 +1045,7 @@ d.count)/((e-d.lts)/1E3)),this.lastVideoFramesRecv.set(b.ssrc,{count:a.framesRec
 a.totalSamplesReceived);a.jitterBufferDelay&&a.jitterBufferEmittedCount&&(b.jitterBufferMs=1E3*a.jitterBufferDelay/a.jitterBufferEmittedCount);b.outputLevel=a.audioLevel;var d=1920;a.totalSamplesDuration&&a.totalSamplesReceived&&(d=a.totalSamplesReceived/a.totalSamplesDuration/50,b.receivedFrames=Math.round(a.totalSamplesReceived/d));a.concealedSamples&&(b.droppedFrames=Math.round(a.concealedSamples/d))}},b.prototype.processRemoteInboundStats=function(a,b){(a=this.report.get(a))&&(b.packetsLost=a.packetsLost,
 a.roundTripTime&&(b.rttMs=1E3*a.roundTripTime))},b.prototype.getCodecFromCodecStats=function(a){a=this.report.get(a);return a?(a=a.mimeType.match(/\/(.*)$/))&&a[1]?a[1]:"":""},b.prototype.updateSendBitrate=function(){var a=0,b=null,f=null;this.mediaBytesSent.forEach(function(b){a+=b.diffMean()});this.mediaBytesRetransmit.forEach(function(a){b=null===b?a.diffMean():b+a.diffMean()});this.mediaBytesTargetEncode.forEach(function(a){f=null===f?a.diffMean():f+a.diffMean()});this._stats.bitrate={actualEncoded:8*
 (null!==b?a-b:a)/(this.options.updateInterval/1E3),transmit:8*a/(this.options.updateInterval/1E3)};null!==b&&(this._stats.bitrate.retransmit=8*b/(this.options.updateInterval/1E3));null!==f&&(this._stats.bitrate.targetEncoded=8*f/(this.options.updateInterval/1E3))},b}(xg),Lp=function(a){function b(){return null!==a&&a.apply(this,arguments)||this}return ff(b,a),b.prototype.updateStats=function(){return Promise.resolve()},b}(xg);class cl{constructor(a){this.localCandidateCount=0;this.allCandidateReceived=
-!1;this.videoTrack=this.audioTrack=null;this.mediaStream=new MediaStream;this.ID=dl;dl+=1;this.spec=a;this.createPeerConnection();a=this.pc;var b=void 0,d=void 0;void 0===b&&(b=250);void 0===d&&(d=8);var e;this.statsFilter=(e=(e=navigator.userAgent.toLocaleLowerCase().match(/chrome\/[\d]./i))&&e[0]?Number(e[0].split("/")[1]):null)?76>e?new Kp(a,{updateInterval:b,lossRateInterval:d}):new bl(a,{updateInterval:b,lossRateInterval:d}):window.RTCStatsReport&&a.getStats()instanceof Promise?new bl(a,{updateInterval:b,
+!1;this.videoTrack=this.audioTrack=null;this.mediaStream=new MediaStream;this.ID=dl;dl+=1;this.spec=a;this.createPeerConnection();a=this.pc;var b=void 0,d=void 0;void 0===b&&(b=250);void 0===d&&(d=8);var e;this.statsFilter=(e=(e=navigator.userAgent.toLocaleLowerCase().match(/chrome\/(\d+)/i))&&e[1]?Number(e[1]):null)?76>e?new Kp(a,{updateInterval:b,lossRateInterval:d}):new bl(a,{updateInterval:b,lossRateInterval:d}):window.RTCStatsReport&&a.getStats()instanceof Promise?new bl(a,{updateInterval:b,
 lossRateInterval:d}):new Lp(a,{updateInterval:b,lossRateInterval:d})}get _statsFilter(){return this.statsFilter}getStats(){return this.statsFilter.getStats()}async createOfferSDP(){try{let a=await this.pc.createOffer(this.offerOptions);if(!a.sdp)throw Error("offer sdp is empty");return a.sdp}catch(a){throw h.error("create offer error:",a.toString()),new m(l.CREATE_OFFER_FAILED,a.toString());}}async setOfferSDP(a){try{await this.pc.setLocalDescription({type:"offer",sdp:a})}catch(b){throw h.error("set local offer error",
 b.toString()),new m(l.CREATE_OFFER_FAILED,b.toString());}}async setAnswerSDP(a){try{await this.pc.setRemoteDescription({type:"answer",sdp:a})}catch(b){if("InvalidStateError"!==b.name||"stable"!==this.pc.signalingState)throw h.error("set remote answer error",b.toString()),new m(l.SET_ANSWER_FAILED,b.toString());h.debug("[pc-".concat(this.ID,"] ignore invalidstate error"))}}close(){this.onConnectionStateChange=this.onICEConnectionStateChange=void 0;try{this.pc.close()}catch(a){}this.statsFilter.destroy()}createPeerConnection(){let a=
 {iceServers:[{urls:"stun:webcs.agora.io:3478"}]};var b;this.spec.iceServers?a.iceServers=this.spec.iceServers:this.spec.turnServer&&"off"!==this.spec.turnServer.mode&&r(b=this.spec.turnServer.servers).call(b,b=>{var d,f;(a.iceServers&&a.iceServers.push({username:b.username,credential:b.password,credentialType:"password",urls:n(d="turn:".concat(b.turnServerURL,":")).call(d,b.udpport,"?transport=udp")}),b.tcpport)&&a.iceServers&&a.iceServers.push({username:b.username,credential:b.password,credentialType:"password",
