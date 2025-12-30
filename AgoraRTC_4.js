@@ -40,8 +40,40 @@ e.streams=[a.stream];this.dispatchEvent(e)})},this.addEventListener("addstream",
 function(){var a;return this._senders=this._senders||[],zb(a=this._senders).call(a)};let b=c.RTCPeerConnection.prototype.addTrack;c.RTCPeerConnection.prototype.addTrack=function(c,d){let e=b.apply(this,arguments);return e||(e=a(this,c),this._senders.push(e)),e};let d=c.RTCPeerConnection.prototype.removeTrack;c.RTCPeerConnection.prototype.removeTrack=function(a){var b;d.apply(this,arguments);let c=E(b=this._senders).call(b,a);var e;-1!==c&&Ja(e=this._senders).call(e,c,1)}}let b=c.RTCPeerConnection.prototype.addStream;
 c.RTCPeerConnection.prototype.addStream=function(c){var d;this._senders=this._senders||[];b.apply(this,[c]);r(d=c.getTracks()).call(d,b=>{this._senders.push(a(this,b))})};let d=c.RTCPeerConnection.prototype.removeStream;c.RTCPeerConnection.prototype.removeStream=function(a){var b;this._senders=this._senders||[];d.apply(this,[a]);r(b=a.getTracks()).call(b,a=>{var b;let c=U(b=this._senders).call(b,b=>b.track===a);var d,e;c&&Ja(d=this._senders).call(d,E(e=this._senders).call(e,c),1)})}}else if("object"==
 typeof c&&c.RTCPeerConnection&&"getSenders"in c.RTCPeerConnection.prototype&&"createDTMFSender"in c.RTCPeerConnection.prototype&&c.RTCRtpSender&&!("dtmf"in c.RTCRtpSender.prototype)){let a=c.RTCPeerConnection.prototype.getSenders;c.RTCPeerConnection.prototype.getSenders=function(){let b=a.apply(this,[]);return r(b).call(b,a=>a._pc=this),b};ba(c.RTCRtpSender.prototype,"dtmf",{get(){return void 0===this._dtmf&&("audio"===this.track.kind?this._dtmf=this._pc.createDTMFSender(this.track):this._dtmf=null),
-this._dtmf}})}}function Kg(c){if(c.RTCPeerConnection){var a=c.RTCPeerConnection.prototype.getStats;c.RTCPeerConnection.prototype.getStats=function(){let [b,c,e]=arguments;if(0<arguments.length&&"function"==typeof b)return a.apply(this,arguments);if(0===a.length&&(0===arguments.length||"function"!=typeof b))return a.apply(this,[]);let f=function(a){const b={};a=a.result();return r(a).call(a,a=>{var c;const d={id:a.id,timestamp:a.timestamp,type:{localcandidate:"local-candidate",remotecandidate:"remote-candidate"}[a.type]||
-a.type};r(c=a.names()).call(c,b=>{d[b]=a.stat(b)});b[d.id]=d}),b},g=function(a){var b;return new Y(A(b=S(a)).call(b,b=>[b,a[b]]))};return 2<=arguments.length?a.apply(this,[function(a){c(g(f(a)))},b]):(new u((b,c)=>{a.apply(this,[function(a){b(g(f(a)))},c])})).then(c,e)}}}function Lg(c){
+this._dtmf}})}}function Kg(c){
+  if (!c || !c.RTCPeerConnection) return;
+
+  var nativeGetStats = c.RTCPeerConnection.prototype.getStats;
+  if (typeof nativeGetStats !== "function") return;
+
+  c.RTCPeerConnection.prototype.getStats = function(){
+    var arg0 = arguments[0];
+    var arg1 = arguments[1];
+
+    // Legacy callback style: getStats(successCb, failCb)
+    if (typeof arg0 === "function") {
+      var successCb = arg0;
+      var failCb = (typeof arg1 === "function") ? arg1 : null;
+
+      try {
+        var p = nativeGetStats.call(this); // force Promise form
+        p.then(function(r){ successCb(r); })
+         .catch(function(e){ if (failCb) failCb(e); });
+      } catch (e) {
+        if (failCb) failCb(e);
+      }
+      return;
+    }
+
+    // Selector form: only forward if it is truly a MediaStreamTrack
+    if (arg0 && c.MediaStreamTrack && arg0 instanceof c.MediaStreamTrack) {
+      return nativeGetStats.call(this, arg0);
+    }
+
+    // Default Promise form
+    return nativeGetStats.call(this);
+  };
+}function Lg(c){
   if("object"==typeof c&&c.RTCPeerConnection&&c.RTCRtpSender&&c.RTCRtpReceiver){
     if(!("getStats"in c.RTCRtpSender.prototype)){
       let a=c.RTCPeerConnection.prototype.getSenders;
