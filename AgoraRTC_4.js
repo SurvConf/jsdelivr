@@ -707,8 +707,6 @@ FRAMERATE_SENT_TOO_LOW:1002,SEND_VIDEO_BITRATE_TOO_LOW:1003,RECV_VIDEO_DECODE_FA
     this.remoteConnectionsMap=new Y;
     this.trafficStatsPeerList=[];
 
-    // Helper: safely get stats object from Agora connection.pc.getStats()
-    // Returns a "shape-compatible" object even if underlying getStats throws / is missing fields.
     this._safePcGetStats=(pc)=>{
       let s=null;
       try{
@@ -716,7 +714,6 @@ FRAMERATE_SENT_TOO_LOW:1002,SEND_VIDEO_BITRATE_TOO_LOW:1003,RECV_VIDEO_DECODE_FA
       }catch(e){
         s=null;
       }
-      // normalize to expected structure so downstream code never crashes
       if(!s||"object"!=typeof s) s={};
       if(!s.audioRecv) s.audioRecv=[];
       if(!s.videoRecv) s.videoRecv=[];
@@ -731,7 +728,6 @@ FRAMERATE_SENT_TOO_LOW:1002,SEND_VIDEO_BITRATE_TOO_LOW:1003,RECV_VIDEO_DECODE_FA
       // ------- REMOTE -------
       r(a=this.remoteConnectionsMap).call(a,a=>{
         var b;
-
         let d=a.audioStats;
         var e=a.videoStats, q=a.pcStats;
 
@@ -739,19 +735,15 @@ FRAMERATE_SENT_TOO_LOW:1002,SEND_VIDEO_BITRATE_TOO_LOW:1003,RECV_VIDEO_DECODE_FA
             l=Bb({},gg),
             n=Bb({},yk);
 
-        // SAFE: never let getStats crash this loop
         let m=this._safePcGetStats(a.connection.pc);
-
-        // SAFE: defensive indexing
         let p=m.audioRecv && m.audioRecv.length ? m.audioRecv[0] : void 0;
         let r0=m.videoRecv && m.videoRecv.length ? m.videoRecv[0] : void 0;
 
         q=q&&q.videoRecv&&q.videoRecv.length?q.videoRecv[0]:void 0;
 
         let t=!0===a.connection.pc._statsFilter && !0===a.connection.pc._statsFilter.videoIsReady;
-        u=this.trafficStats&&U(b=this.trafficStats.peer_delay).call(b,b=>b.peer_uid===a.connection.getUserId());
+        let u=this.trafficStats&&U(b=this.trafficStats.peer_delay).call(b,b=>b.peer_uid===a.connection.getUserId());
 
-        // ---- remote audio ----
         p&&(
           ("opus"!==p.codec&&"aac"!==p.codec||(h.codecType=p.codec)),
           p.outputLevel?h.receiveLevel=Math.round(32767*p.outputLevel):
@@ -769,7 +761,6 @@ FRAMERATE_SENT_TOO_LOW:1002,SEND_VIDEO_BITRATE_TOO_LOW:1003,RECV_VIDEO_DECODE_FA
           10<h.totalDuration&&Zc.isRemoteAudioFreeze(b)&&(h.totalFreezeTime+=1)
         );
 
-        // ---- remote video ----
         r0&&(
           ("H264"!==r0.codec&&"VP8"!==r0.codec||(l.codecType=r0.codec)),
           l.receiveBytes=r0.bytes||0,
@@ -797,7 +788,6 @@ FRAMERATE_SENT_TOO_LOW:1002,SEND_VIDEO_BITRATE_TOO_LOW:1003,RECV_VIDEO_DECODE_FA
           l.freezeRate=l.totalDuration? (l.totalFreezeTime/l.totalDuration) : 0
         );
 
-        // ---- remote network delay ----
         u&&(
           h.end2EndDelay=u.B_ad,
           l.end2EndDelay=u.B_vd,
@@ -823,7 +813,6 @@ FRAMERATE_SENT_TOO_LOW:1002,SEND_VIDEO_BITRATE_TOO_LOW:1003,RECV_VIDEO_DECODE_FA
             e=Bb({},te),
             h=Bb({},ue);
 
-        // SAFE: never let getStats crash this loop
         var l=this._safePcGetStats(a.connection.pc);
 
         let n=l.audioSend && l.audioSend.length ? l.audioSend[0] : void 0;
@@ -831,7 +820,6 @@ FRAMERATE_SENT_TOO_LOW:1002,SEND_VIDEO_BITRATE_TOO_LOW:1003,RECV_VIDEO_DECODE_FA
 
         let m=a.connection.getUserId();
 
-        // ---- local audio ----
         n&&(
           ("opus"!==n.codec&&"aac"!==n.codec||(e.codecType=n.codec)),
           n.inputLevel?e.sendVolumeLevel=Math.round(32767*n.inputLevel):
@@ -842,7 +830,6 @@ FRAMERATE_SENT_TOO_LOW:1002,SEND_VIDEO_BITRATE_TOO_LOW:1003,RECV_VIDEO_DECODE_FA
           e.sendBitrate=b?8*Math.max(0,e.sendBytes-(b.sendBytes||0)):0
         );
 
-        // ---- local video ----
         l0&&(
           ("H264"!==l0.codec&&"VP8"!==l0.codec||(h.codecType=l0.codec)),
           h.sendBytes=l0.bytes||0,
@@ -884,15 +871,130 @@ FRAMERATE_SENT_TOO_LOW:1002,SEND_VIDEO_BITRATE_TOO_LOW:1003,RECV_VIDEO_DECODE_FA
         a.videoStats&&a.connection.videoTrack&&this.exceptionMonitor.setLocalVideoStats(m,a.connection.videoTrack,a.videoStats);
       });
     };
+
+    // ✅ these MUST be inside constructor
+    this.clientId=a;
+    this.updateStatsInterval=window.setInterval(this.updateStats,1E3);
+    this.exceptionMonitor=new wp;
+    this.exceptionMonitor.on("exception",(a,d,e)=>{
+      this.onStatsException&&this.onStatsException(a,d,e);
+    });
   }
-};this.clientId=a;this.updateStatsInterval=window.setInterval(this.updateStats,1E3);this.exceptionMonitor=new wp;this.exceptionMonitor.on("exception",
-(a,d,e)=>{this.onStatsException&&this.onStatsException(a,d,e)})}reset(){this.localConnectionsMap=new Y;this.remoteConnectionsMap=new Y;this.trafficStats=void 0;this.trafficStatsPeerList=[];this.uplinkStats=void 0}getLocalAudioTrackStats(a){return(a=this.localConnectionsMap.get(a))&&a.audioStats?a.audioStats:Bb({},te)}getLocalVideoTrackStats(a){return(a=this.localConnectionsMap.get(a))&&a.videoStats?a.videoStats:Bb({},ue)}getRemoteAudioTrackStats(a){var b;let d=this.remoteConnectionsMap.get(a);if(!d||
-!d.audioStats)return Bb({},fg);if(!this.trafficStats)return d.audioStats;a=U(b=this.trafficStats.peer_delay).call(b,a=>a.peer_uid===d.connection.user.uid);return a&&(d.audioStats.publishDuration=a.B_ppad+(v()-this.trafficStats.timestamp)),d.audioStats}getRemoteNetworkQualityStats(a){return(a=this.remoteConnectionsMap.get(a))&&a.networkStats?a.networkStats:Bb({},yk)}getRemoteVideoTrackStats(a){var b;let d=this.remoteConnectionsMap.get(a);if(!d||!d.videoStats)return Bb({},gg);if(!this.trafficStats)return d.videoStats;
-a=U(b=this.trafficStats.peer_delay).call(b,a=>a.peer_uid===d.connection.user.uid);return a&&(d.videoStats.publishDuration=a.B_ppvd+(v()-this.trafficStats.timestamp)),d.videoStats}getRTCStats(){var a,b;let d=0,e=0,f=0,g=0;r(a=this.localConnectionsMap).call(a,a=>{a.audioStats&&(d+=a.audioStats.sendBytes,e+=a.audioStats.sendBitrate);a.videoStats&&(d+=a.videoStats.sendBytes,e+=a.videoStats.sendBitrate)});r(b=this.remoteConnectionsMap).call(b,a=>{a.audioStats&&(f+=a.audioStats.receiveBytes,g+=a.audioStats.receiveBitrate);
-a.videoStats&&(f+=a.videoStats.receiveBytes,g+=a.videoStats.receiveBitrate)});a=1;return this.trafficStats&&(a+=this.trafficStats.peer_delay.length),{Duration:0,UserCount:a,SendBitrate:e,SendBytes:d,RecvBytes:f,RecvBitrate:g,OutgoingAvailableBandwidth:this.uplinkStats?this.uplinkStats.B_uab/1E3:0,RTT:this.trafficStats?2*this.trafficStats.B_acd:0}}removeConnection(a){this.localConnectionsMap.delete(a);this.remoteConnectionsMap.delete(a)}addLocalConnection(a){let b=a.connectionId;this.localConnectionsMap.has(b)||
-this.localConnectionsMap.set(b,{connection:a})}addRemoteConnection(a){let b=a.connectionId;this.remoteConnectionsMap.has(b)||this.remoteConnectionsMap.set(b,{connection:a})}updateTrafficStats(a){var b;let d=O(b=a.peer_delay).call(b,a=>{var b;return-1===E(b=this.trafficStatsPeerList).call(b,a.peer_uid)});r(d).call(d,a=>{var b,d;let e=U(b=Ob(sc(d=this.remoteConnectionsMap).call(d))).call(b,b=>b.connection._userId===a.peer_uid);void 0!==a.B_ppad&&void 0!==a.B_ppvd&&(this.onUploadPublishDuration&&this.onUploadPublishDuration(a.peer_uid,
-a.B_ppad,a.B_ppvd,e?v()-e.connection.startTime:0),this.trafficStatsPeerList.push(a.peer_uid))});this.trafficStats=a}updateUplinkStats(a){var b;this.uplinkStats&&this.uplinkStats.B_fir!==a.B_fir&&h.debug(n(b="[".concat(this.clientId,"]: Period fir changes to ")).call(b,a.B_fir));this.uplinkStats=a}static isRemoteVideoFreeze(a,b,d){if(!a)return!1;a=!d||b.framesDecodeCount>d.framesDecodeCount;return!!d&&b.framesDecodeFreezeTime>d.framesDecodeFreezeTime||!a}static isRemoteAudioFreeze(a){return!!a&&a._isFreeze()}isLocalVideoFreeze(a){return!(!a.inputFrame||
-!a.sentFrame)&&5<a.inputFrame.frameRate&&3>a.sentFrame.frameRate}}var Qk;let qg=()=>{},Mh={},dd=[[[100,.00520833333333333],[66.6666666666666,.00434027777777778],[66.6666666666667,.00173611111111111]],[[233.333333333333,.00347222222222222],[266.666666666667],[.00173611111111111],[183.333333333333,2.17013888888889E-4]],[[700,.001953125],[200,.001953125],[175,2.44140625E-4]],[[899.999999999998,.00173611111111111],[1200,8.68055555555556E-4],[160,2.60416666666667E-4]],[[2666.66666666667,8.84130658436214E-4],
+
+  reset(){
+    this.localConnectionsMap=new Y;
+    this.remoteConnectionsMap=new Y;
+    this.trafficStats=void 0;
+    this.trafficStatsPeerList=[];
+    this.uplinkStats=void 0;
+  }
+
+  getLocalAudioTrackStats(a){
+    return(a=this.localConnectionsMap.get(a))&&a.audioStats?a.audioStats:Bb({},te);
+  }
+
+  getLocalVideoTrackStats(a){
+    return(a=this.localConnectionsMap.get(a))&&a.videoStats?a.videoStats:Bb({},ue);
+  }
+
+  getRemoteAudioTrackStats(a){
+    var b;
+    let d=this.remoteConnectionsMap.get(a);
+    if(!d||!d.audioStats)return Bb({},fg);
+    if(!this.trafficStats)return d.audioStats;
+    a=U(b=this.trafficStats.peer_delay).call(b,a=>a.peer_uid===d.connection.user.uid);
+    return a&&(d.audioStats.publishDuration=a.B_ppad+(v()-this.trafficStats.timestamp)),d.audioStats;
+  }
+
+  getRemoteNetworkQualityStats(a){
+    return(a=this.remoteConnectionsMap.get(a))&&a.networkStats?a.networkStats:Bb({},yk);
+  }
+
+  getRemoteVideoTrackStats(a){
+    var b;
+    let d=this.remoteConnectionsMap.get(a);
+    if(!d||!d.videoStats)return Bb({},gg);
+    if(!this.trafficStats)return d.videoStats;
+    a=U(b=this.trafficStats.peer_delay).call(b,a=>a.peer_uid===d.connection.user.uid);
+    return a&&(d.videoStats.publishDuration=a.B_ppvd+(v()-this.trafficStats.timestamp)),d.videoStats;
+  }
+
+  getRTCStats(){
+    var a,b;
+    let d=0,e=0,f=0,g=0;
+    r(a=this.localConnectionsMap).call(a,a=>{
+      a.audioStats&&(d+=a.audioStats.sendBytes,e+=a.audioStats.sendBitrate);
+      a.videoStats&&(d+=a.videoStats.sendBytes,e+=a.videoStats.sendBitrate);
+    });
+    r(b=this.remoteConnectionsMap).call(b,a=>{
+      a.audioStats&&(f+=a.audioStats.receiveBytes,g+=a.audioStats.receiveBitrate);
+      a.videoStats&&(f+=a.videoStats.receiveBytes,g+=a.videoStats.receiveBitrate);
+    });
+    a=1;
+    return this.trafficStats&&(a+=this.trafficStats.peer_delay.length),{
+      Duration:0,
+      UserCount:a,
+      SendBitrate:e,
+      SendBytes:d,
+      RecvBytes:f,
+      RecvBitrate:g,
+      OutgoingAvailableBandwidth:this.uplinkStats?this.uplinkStats.B_uab/1E3:0,
+      RTT:this.trafficStats?2*this.trafficStats.B_acd:0
+    };
+  }
+
+  removeConnection(a){
+    this.localConnectionsMap.delete(a);
+    this.remoteConnectionsMap.delete(a);
+  }
+
+  addLocalConnection(a){
+    let b=a.connectionId;
+    this.localConnectionsMap.has(b)||this.localConnectionsMap.set(b,{connection:a});
+  }
+
+  addRemoteConnection(a){
+    let b=a.connectionId;
+    this.remoteConnectionsMap.has(b)||this.remoteConnectionsMap.set(b,{connection:a});
+  }
+
+  updateTrafficStats(a){
+    var b;
+    let d=O(b=a.peer_delay).call(b,a=>{
+      var b;
+      return-1===E(b=this.trafficStatsPeerList).call(b,a.peer_uid);
+    });
+    r(d).call(d,a=>{
+      var b,d;
+      let e=U(b=Ob(sc(d=this.remoteConnectionsMap).call(d))).call(b,b=>b.connection._userId===a.peer_uid);
+      void 0!==a.B_ppad&&void 0!==a.B_ppvd&&(
+        this.onUploadPublishDuration&&this.onUploadPublishDuration(a.peer_uid,a.B_ppad,a.B_ppvd,e?v()-e.connection.startTime:0),
+        this.trafficStatsPeerList.push(a.peer_uid)
+      );
+    });
+    this.trafficStats=a;
+  }
+
+  updateUplinkStats(a){
+    var b;
+    this.uplinkStats&&this.uplinkStats.B_fir!==a.B_fir&&h.debug(n(b="[".concat(this.clientId,"]: Period fir changes to ")).call(b,a.B_fir));
+    this.uplinkStats=a;
+  }
+
+  static isRemoteVideoFreeze(a,b,d){
+    if(!a)return!1;
+    a=!d||b.framesDecodeCount>d.framesDecodeCount;
+    return!!d&&b.framesDecodeFreezeTime>d.framesDecodeFreezeTime||!a;
+  }
+
+  static isRemoteAudioFreeze(a){
+    return!!a&&a._isFreeze();
+  }
+
+  isLocalVideoFreeze(a){
+    return!(!a.inputFrame||!a.sentFrame)&&5<a.inputFrame.frameRate&&3>a.sentFrame.frameRate;
+  }
+}var Qk;let qg=()=>{},Mh={},dd=[[[100,.00520833333333333],[66.6666666666666,.00434027777777778],[66.6666666666667,.00173611111111111]],[[233.333333333333,.00347222222222222],[266.666666666667],[.00173611111111111],[183.333333333333,2.17013888888889E-4]],[[700,.001953125],[200,.001953125],[175,2.44140625E-4]],[[899.999999999998,.00173611111111111],[1200,8.68055555555556E-4],[160,2.60416666666667E-4]],[[2666.66666666667,8.84130658436214E-4],
 [1166.66666666667,8.84130658436214E-4],[600,4.82253E-5]]];class xp{constructor(){this.fnMap=new Y}throttleByKey(a,b,d,e,...f){if(this.fnMap.has(b)){var g=this.fnMap.get(b);g.threshold!==d?(g.fn(...g.args),clearTimeout(g.timer),g=window.setTimeout(()=>{const a=this.fnMap.get(b);a&&a.fn(...a.args);this.fnMap.delete(b)},d),this.fnMap.set(b,{fn:a,threshold:d,timer:g,args:f,skipFn:e})):(g.skipFn&&g.skipFn(...g.args),this.fnMap.set(b,We({},g,{fn:a,args:f,skipFn:e})))}else g=window.setTimeout(()=>{const a=
 this.fnMap.get(b);a&&a.fn(...a.args);this.fnMap.delete(b)},d),this.fnMap.set(b,{fn:a,threshold:d,timer:g,args:f,skipFn:e})}}let Rk=new xp,Sk=Ca(Qk=Rk.throttleByKey).call(Qk,Rk),Nd=null,yp=1;class cc{constructor(a){var b;this.lockingPromise=u.resolve();this.locks=0;this.name="";this.lockId=yp++;a&&(this.name=a);h.debug(n(b="[lock-".concat(this.name,"-")).call(b,this.lockId,"] is created."))}get isLocked(){return 0<this.locks}lock(){var a,b;let d;this.locks+=1;h.debug(n(a=n(b="[lock-".concat(this.name,
 "-")).call(b,this.lockId,"] is locked, current queue ")).call(a,this.locks,"."));let e=new u(a=>{d=()=>{var b,d;--this.locks;h.debug(n(b=n(d="[lock-".concat(this.name,"-")).call(d,this.lockId,"] is not locked, current queue ")).call(b,this.locks,"."));a()}});a=this.lockingPromise.then(()=>d);return this.lockingPromise=this.lockingPromise.then(()=>e),a}}let Ye=new cc("safari"),Rh=!1,Sh=!1;class zp extends Ya{constructor(){super();this._state=rc.IDLE;this.lastAccessCameraPermission=this.lastAccessMicrophonePermission=
