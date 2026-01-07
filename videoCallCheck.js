@@ -36,7 +36,7 @@ const subscribed = new Set();       // "uid:mediaType" to avoid duplicates
 options = {
         mode:null,
         codec:null,
-        appID:null,
+        appId:null,
         channel: null,
         uid:null,
         token:null,
@@ -84,7 +84,7 @@ async function join() {
   // Join a channel and create local tracks. Best practice is to use Promise.all and run them concurrently.
   [ options.uid, localTracks.audioTrack, localTracks.videoTrack ] = await Promise.all([
     // Join the channel.
-    client.join(options.appid, options.channel, options.token || null, options.uid || null),
+    client.join(options.appId, options.channel, options.token || null, options.uid || null),
     // Create tracks to the local microphone and camera.
     AgoraRTC.createMicrophoneAudioTrack(),
     AgoraRTC.createCameraVideoTrack()
@@ -298,6 +298,22 @@ function handleUserPublished(user, mediaType) {
     .catch((e) => console.error("subscribe chain error", uid, e));
 
   subscribeQueue.set(uid, next);
+}
+
+async function subscribePendingForUser(user) {
+  const uid = user.uid;
+  const set = pendingMedia.get(uid);
+  if (!set || set.size === 0) return;
+
+  // Always do audio first, then video (stable order)
+  const order = ["audio", "video"];
+
+  for (const type of order) {
+    if (!set.has(type)) continue;
+
+    await subscribe(user, type);
+    set.delete(type);
+  }
 }
 
 /*
