@@ -127,9 +127,9 @@ async function join() {
    localTracks.videoTrack.play("local-player");
   }
 
-  console.log(uid==1);
-  console.log(uid);
-  if(uid == 1 && recording != "false"){
+  console.log(options.uid==1);
+  console.log(options.uid);
+  if(options.uid == 1 && recording != "false"){
   	console.log('sending acquire');
 	jQuery.ajax({
 	        type: "POST",
@@ -219,102 +219,96 @@ async function leave() {
  * @param {trackMediaType - The {@link https://docs.agora.io/en/Voice/API%20Reference/web_ng/interfaces/itrack.html#trackmediatype | media type} to add.
  */
 async function subscribe(user, mediaType) {
-  console.log("MEDIA TYPE: " + mediaType);
-
   const uid = user.uid;
-  const key = `${uid}:${mediaType}`;
+  console.log("MEDIA TYPE:", mediaType, "uid:", uid);
 
-  // Prevent duplicate subscribe calls (common when Agora fires multiple events)
-  if (subscribed.has(key)) {
-    console.log("already subscribed", key);
-    return;
-  }
-  subscribed.add(key);
+  // mark requested media type
+  if (!pendingMedia.has(uid)) pendingMedia.set(uid, new Set());
+  pendingMedia.get(uid).add(mediaType);
 
-  try {
-    // Subscribe to the remote user
-    await client.subscribe(user, mediaType);
-    console.log("subscribe success", uid, mediaType);
-  } catch (err) {
-    // If it failed, allow retry later (important!)
-    subscribed.delete(key);
-    console.error("subscribe failed", uid, mediaType, err);
-    throw err;
-  }
+  // serialize per uid
+  const prev = subscribeQueue.get(uid) || Promise.resolve();
 
-  // ------- your existing UI / play logic -------
-  if (nameDisplay == 'true') {
-    name_param = '';
-  } else {
-    name_param = 'style="display:none"';
-  }
+  const next = prev.then(async () => {
+    const set = pendingMedia.get(uid);
+    if (!set || set.size === 0) return;
 
-  if (mediaType === 'video') {
-    const player = jQuery(`
-      <div id="player-wrapper-${uid}">
-        <p class="player-name" ${name_param}>${rolelist[uid - 1]}</p>
-        <div id="player-${uid}" class="player"></div>
-      </div>
-    `);
+    // ALWAYS do audio first, then video
+    const order = ["audio", "video"];
+    for (const type of order) {
+      if (!set.has(type)) continue;
 
-    jQuery("#remote-playerlist").append(player);
-    user.videoTrack.play(`player-${uid}`);
-  }
+      const key = `${uid}:${type}`;
+      if (subscribed.has(key)) {
+        set.delete(type);
+        continue;
+      }
 
-  if (mediaType === 'audio') {
-    user.audioTrack.play();
+      subscribed.add(key);
+      try {
+        await client.subscribe(user, type);
+        console.log("subscribe success", uid, type);
+        set.delete(type);
+      } catch (err) {
+        // allow retry later
+        subscribed.delete(key);
+        console.error("subscribe failed", uid, type, err);
+        throw err;
+      }
 
-    if (audioOnly == 'true') {
-      const player = jQuery(`
-        <div id="player-wrapper-${uid}">
-          <p class="player-name" ${name_param}>${rolelist[uid - 1]}</p>
-          <div id="player-${uid}" class="player"></div>
-        </div>
-      `);
+      // ---- play logic (after subscribe) ----
+      const name_param = (nameDisplay == 'true') ? '' : 'style="display:none"';
 
-      jQuery("#remote-playerlist").append(player);
-
-      jQuery(`#player-${uid}`).append(
-        `<div style="width: 100%; height: 100%; position: relative; overflow: hidden; background-color: white; display: table; border: 3px solid black;"></div>`
-      );
-      jQuery(`#player-${uid} > div`)
-        .css('background-color', 'white')
-        .css('display', 'table')
-        .css('border', '3px solid black')
-        .append(`<h3 class='audio-name'>${rolelist[uid - 1]}</h3>`);
-
-      jQuery('.agora_video_player').css('display', 'none');
-    }
-  }
-
-  // ------- your existing timer logic (unchanged) -------
-  if (!already_started) {
-    clearTimeout(lastJoinItv);
-
-    if (client.remoteUsers.length >= group_size - 1) {
-      console.log('timer started group full');
-      already_started = true;
-      timer_itv = setInterval(function () {
-        console.log(time_left);
-        time_left -= 1;
-        jQuery('#timer').text(
-          Math.floor(time_left / 60).toString().padStart(2, '0') +
-          ':' +
-          (time_left % 60).toString().padStart(2, '0')
-        );
-        if (time_left <= 0) {
-          clearInterval(timer_itv);
-          Qualtrics.SurveyEngine.setEmbeddedData("callCompleted", "true");
-          jQuery('#NextButton').click();
+      if (type === "video") {
+        // avoid duplicate DOM
+        if (!document.getElementById(`player-wrapper-${uid}`)) {
+          const player = jQuery(`
+            <div id="player-wrapper-${uid}">
+              <p class="player-name" ${name_param}>${rolelist[uid - 1]}</p>
+              <div id="player-${uid}" class="player"></div>
+            </div>
+          `);
+          jQuery("#remote-playerlist").append(player);
         }
-      }, 1000);
-    } else {
-      console.log('timer waiting 5 seconds for next join');
-      lastJoinItv = setTimeout(function () {
-        console.log('timer started, 5 second timeout');
+        user.videoTrack && user.videoTrack.play(`player-${uid}`);
+      }
+
+      if (type === "audio") {
+        user.audioTrack && user.audioTrack.play();
+
+        if (audioOnly == 'true') {
+          if (!document.getElementById(`player-wrapper-${uid}`)) {
+            const player = jQuery(`
+              <div id="player-wrapper-${uid}">
+                <p class="player-name" ${name_param}>${rolelist[uid - 1]}</p>
+                <div id="player-${uid}" class="player"></div>
+              </div>
+            `);
+            jQuery("#remote-playerlist").append(player);
+          }
+
+          if (!jQuery(`#player-${uid} > div`).length) {
+            jQuery(`#player-${uid}`).append(
+              `<div style="width: 100%; height: 100%; position: relative; overflow: hidden; background-color: white; display: table; border: 3px solid black;"></div>`
+            );
+            jQuery(`#player-${uid} > div`)
+              .css('background-color', 'white')
+              .css('display', 'table')
+              .css('border', '3px solid black')
+              .append(`<h3 class='audio-name'>${rolelist[uid - 1]}</h3>`);
+            jQuery('.agora_video_player').css('display','none');
+          }
+        }
+      }
+    }
+
+    // timer logic (unchanged)
+    if (!already_started) {
+      clearTimeout(lastJoinItv);
+
+      if (client.remoteUsers.length >= group_size - 1) {
         already_started = true;
         timer_itv = setInterval(function () {
-          console.log(time_left);
           time_left -= 1;
           jQuery('#timer').text(
             Math.floor(time_left / 60).toString().padStart(2, '0') +
@@ -327,9 +321,29 @@ async function subscribe(user, mediaType) {
             jQuery('#NextButton').click();
           }
         }, 1000);
-      }, timeToWait * 1000);
+      } else {
+        lastJoinItv = setTimeout(function () {
+          already_started = true;
+          timer_itv = setInterval(function () {
+            time_left -= 1;
+            jQuery('#timer').text(
+              Math.floor(time_left / 60).toString().padStart(2, '0') +
+              ':' +
+              (time_left % 60).toString().padStart(2, '0')
+            );
+            if (time_left <= 0) {
+              clearInterval(timer_itv);
+              Qualtrics.SurveyEngine.setEmbeddedData("callCompleted", "true");
+              jQuery('#NextButton').click();
+            }
+          }, 1000);
+        }, timeToWait * 1000);
+      }
     }
-  }
+  }).catch(e => console.error("subscribe chain error", uid, e));
+
+  subscribeQueue.set(uid, next);
+  return next;
 }
 
 async function subscribePendingForUser(user) {
@@ -356,21 +370,8 @@ async function subscribePendingForUser(user) {
  */
 function handleUserPublished(user, mediaType) {
   console.log("user published", user.uid, mediaType);
-
-  const uid = user.uid;
-  remoteUsers[uid] = user;
-
-  // Track pending media types for this uid
-  if (!pendingMedia.has(uid)) pendingMedia.set(uid, new Set());
-  pendingMedia.get(uid).add(mediaType);
-
-  // Serialize all subscribe work per-uid
-  const prev = subscribeQueue.get(uid) || Promise.resolve();
-  const next = prev
-    .then(() => subscribePendingForUser(user))
-    .catch((e) => console.error("subscribe chain error", uid, e));
-
-  subscribeQueue.set(uid, next);
+  remoteUsers[user.uid] = user;
+  subscribe(user, mediaType); // now subscribe() itself queues/serializes
 }
 
 /*
