@@ -25,11 +25,6 @@ var localTracks = [];
 var remoteUsers = {};
 
 
-// --- subscribe serialization helpers (band-aid for old Agora SDK) ---
-const subscribeQueue = new Map();   // uid -> Promise chain (serialize per user)
-const pendingMedia = new Map();     // uid -> Set("audio"|"video")
-const subscribed = new Set();       // "uid:mediaType" to avoid duplicates
-
 /*
  * On initiation. `client` is not attached to any project or channel for any specific user.
  */
