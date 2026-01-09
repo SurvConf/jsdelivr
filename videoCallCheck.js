@@ -12,12 +12,12 @@ async function startJoin(){
  * @param {string} mode - The {@link https://docs.agora.io/en/Voice/API%20Reference/web_ng/interfaces/clientconfig.html#mode| streaming algorithm} used by Agora SDK.
  * @param  {string} codec - The {@link https://docs.agora.io/en/Voice/API%20Reference/web_ng/interfaces/clientconfig.html#codec| client codec} used by the browser.
  */
-var client = [];
+var client = null;
 
 /*
  * Clear the video and audio tracks used by `client` on initiation.
  */
-var localTracks = [];
+var localTracks = { audioTrack: null, videoTrack: null };
 
 /*
  * On initiation no users are connected.
@@ -70,6 +70,31 @@ AgoraRTC.onCameraChanged = async (changedDevice) => {
  * Join a channel, then create local video and audio tracks and publish them to the channel.
  */
 async function join() {
+	
+	// Normalize option keys across pages/scripts
+	if (!options.appId && options.appID) options.appId = options.appID;
+	
+	// Ensure required join params are strings
+	options.appId = String(options.appId || "").trim();
+	options.channel = String(options.channel || "").trim();
+	
+	if (options.token != null) options.token = String(options.token);
+		if (!client || typeof client.join !== "function") {
+	  console.error("Client not initialized", client);
+	  jQuery('#continue-button')
+		.text('Setup error: video client not initialized. Please refresh.')
+		.prop('disabled', true);
+	  return;
+	}
+	
+	// Hard fail with a visible message instead of crashing Agora
+	if (!options.appId || !options.channel) {
+	  console.error("Missing appId/channel", options);
+	  jQuery('#continue-button')
+	    .text('Setup error: missing appId or channel. Please refresh or contact the researcher.')
+	    .prop('disabled', true);
+	  return;
+	}
 
   // Add an event listener to play remote tracks when remote user publishes.
   client.on("user-published", handleUserPublished);
@@ -84,8 +109,16 @@ async function join() {
     AgoraRTC.createMicrophoneAudioTrack(),
     AgoraRTC.createCameraVideoTrack()
   ]);
+	
+	const isAudioOnly = audioOnly === 'true';
+	const isVideoOnly = videoOnly === 'true';
+	
+	// Track creation succeeded => permission/device OK in practice
+	// Use public "isEnabled" if present; otherwise fall back to existence.
+	const audioOK = !!localTracks.audioTrack;
+	const videoOK = !!localTracks.videoTrack;
 
-  if(localTracks.audioTrack._enabled){
+  if(audioOK){
   	jQuery('#audio-connected').text('Success');
   	jQuery('#audio-connected').css('color','green');
   }
@@ -93,7 +126,7 @@ async function join() {
     jQuery('#audio-connected').text('Failed');
     jQuery('#audio-connected').css('color','red');
   }
-  if(localTracks.videoTrack._enabled){
+  if(videoOK){
   	jQuery('#video-connected').text('Success');
   	jQuery('#video-connected').css('color','green');
   }
@@ -101,22 +134,27 @@ async function join() {
     jQuery('#video-connected').text('Failed');
     jQuery('#video-connected').css('color','red');
   }
-  if(localTracks.videoTrack._enabled && localTracks.audioTrack._enabled || ((localTracks.videoTrack._enabled && videoOnly) || (localTracks.audioTrack._enabled && audioOnly)) ){
-    jQuery('#continue-button').text('Click here to continue');
-    jQuery('#continue-button').css('color','white');
-    jQuery('#continue-button').attr('disabled',false);
-    await leave();
-  }
-  else{
-    jQuery('#continue-button').text('Connection Failed. Change your settings and refresh to try again. Otherwise, you are not eligible for this study.');
-  }
-
-  jQuery('#continue-button').on('click',async function(event) {
-  	await leave();
-
-    jQuery('#NextButton').click();
-  });
   
+const passesCheck = (audioOK && videoOK) || (isAudioOnly && audioOK) || (isVideoOnly && videoOK);
+
+if (passesCheck) {
+  jQuery('#continue-button').text('Click here to continue');
+  jQuery('#continue-button').css('color','white');
+  jQuery('#continue-button').prop('disabled', false);
+
+  // Optional: if you want to free devices immediately after check
+  await leave();
+} else {
+  jQuery('#continue-button').text(
+    'Connection Failed. Change your settings and refresh to try again. Otherwise, you are not eligible for this study.'
+  );
+  jQuery('#continue-button').prop('disabled', true);
+}
+
+jQuery('#continue-button').off('click').on('click', async function (event) {
+await leave();
+jQuery('#NextButton').click();
+});
 }
 
 /*
@@ -134,8 +172,7 @@ async function leave() {
       catch(error){
       	console.log(error);
       }
-      	
-      localTracks[trackName] = undefined;
+      localTracks[trackName] = null;
     }
   }
 
