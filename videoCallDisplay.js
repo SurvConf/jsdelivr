@@ -57,6 +57,24 @@ options = {
         token:null,
       };
 
+(function () {
+  const nativeRemove = Element.prototype.remove;
+
+  Element.prototype.remove = function () {
+    // If already detached, do nothing (prevents parentNode.removeChild null crash)
+    if (!this || !this.parentNode) return;
+
+    try {
+      // Prefer native behavior if available
+      if (nativeRemove) return nativeRemove.call(this);
+      return this.parentNode.removeChild(this);
+    } catch (e) {
+      // Swallow errors so Agora cleanup doesn't break the page
+      return;
+    }
+  };
+})();
+
 AgoraRTC.onAutoplayFailed = () => {
   alert("click to start autoplay!")
 }
