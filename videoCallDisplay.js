@@ -45,6 +45,8 @@ var timeToWait = '';
 const subscribeQueue = new Map();   // uid -> Promise chain (serialize per user)
 const pendingMedia = new Map();     // uid -> Set("audio"|"video")
 const subscribed = new Set();       // "uid:mediaType" to avoid duplicates
+const playedAudio = new Set(); // uid -> audio has started playing
+
 /*
  * On initiation. `client` is not attached to any project or channel for any specific user.
  */
@@ -56,6 +58,9 @@ options = {
         uid:null,
         token:null,
       };
+
+/* make Element.remove() safe even if Prototype.js patched it ---
+*/
 
 (function () {
   const nativeRemove = Element.prototype.remove;
@@ -214,7 +219,7 @@ async function leave() {
       	console.log(error);
       }
       	
-      localTracks[trackName] = undefined;
+      localTracks[trackName] = null;
     }
   }
 
@@ -292,7 +297,10 @@ async function subscribe(user, mediaType) {
       }
 
       if (type === "audio") {
-        user.audioTrack && user.audioTrack.play();
+        if (!playedAudio.has(uid)) {
+		  playedAudio.add(uid);
+		  user.audioTrack && user.audioTrack.play();
+		}
 
         if (audioOnly == 'true') {
           if (!document.getElementById(`player-wrapper-${uid}`)) {
