@@ -37,6 +37,9 @@ options = {
         token:null,
       };
 
+	const isAudioOnly = audioOnly === 'true';
+	const isVideoOnly = videoOnly === 'true';
+
 AgoraRTC.onAutoplayFailed = () => {
   alert("click to start autoplay!")
 }
@@ -62,8 +65,6 @@ AgoraRTC.onCameraChanged = async (changedDevice) => {
     oldCameras[0] && localTracks.videoTrack.setDevice(oldCameras[0].deviceId);
   }
 }
-
-
 
 
 /*
