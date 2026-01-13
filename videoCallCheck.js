@@ -37,8 +37,9 @@ options = {
         token:null,
       };
 
-	const isAudioOnly = audioOnly === 'true';
-	const isVideoOnly = videoOnly === 'true';
+var audioOnly = (typeof window.audioOnly !== "undefined") ? window.audioOnly : "false";
+var videoOnly = (typeof window.videoOnly !== "undefined") ? window.videoOnly : "false";
+
 
 AgoraRTC.onAutoplayFailed = () => {
   alert("click to start autoplay!")
